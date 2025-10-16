@@ -1,0 +1,236 @@
+```
+╔══════════════════════════════════════════════════════════════════╗
+║                  BEAD ASSET REPLACEMENT SYSTEM                   ║
+║                     Easy Asset Swap Architecture                  ║
+╚══════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────┐
+│                         CURRENT STATE                             │
+│                                                                   │
+│  MODE: Gradient-based beads (procedurally generated)             │
+│  STATUS: ✅ Production ready                                     │
+│  ASSETS: None required                                           │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│                         FUTURE STATE                              │
+│                                                                   │
+│  MODE: Image-based beads (custom PNG assets)                     │
+│  STATUS: 🔄 Ready for asset swap                                │
+│  ASSETS: Designer provides 5 PNG files                           │
+└──────────────────────────────────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                      HOW TO SWAP ASSETS                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+STEP 1: Designer Creates Assets
+┌─────────────────────────────────────┐
+│ Create 5 PNG files (1024x1024px):  │
+│                                     │
+│ • sandalwood.png                   │
+│ • rudraksha.png                    │
+│ • crystal.png                      │
+│ • lotus.png                        │
+│ • tulsi.png                        │
+│                                     │
+│ See: assets/beads/README.md        │
+└─────────────────────────────────────┘
+              ↓
+
+STEP 2: Place Files
+┌─────────────────────────────────────┐
+│ Save all files to:                 │
+│                                     │
+│ assets/beads/                      │
+│   ├── sandalwood.png               │
+│   ├── rudraksha.png                │
+│   ├── crystal.png                  │
+│   ├── lotus.png                    │
+│   └── tulsi.png                    │
+└─────────────────────────────────────┘
+              ↓
+
+STEP 3: Update Config
+┌─────────────────────────────────────┐
+│ Edit: src/constants/beadAssets.ts  │
+│                                     │
+│ Change each bead from:             │
+│   type: 'gradient'                 │
+│                                     │
+│ To:                                │
+│   type: 'image'                    │
+│   image: require('path/to/png')    │
+└─────────────────────────────────────┘
+              ↓
+
+STEP 4: Test
+┌─────────────────────────────────────┐
+│ Run: npm start                     │
+│                                     │
+│ ✅ Images appear instead of        │
+│    gradients!                      │
+└─────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                      SYSTEM ARCHITECTURE                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────┐
+│                          Component Flow                           │
+└──────────────────────────────────────────────────────────────────┘
+
+User Taps Screen
+      ↓
+BeadCircle Component
+      ↓
+HyperRealisticBead Component
+      ↓
+Check: beadAssets.ts config
+      ↓
+┌─────────────────┬─────────────────┐
+│                 │                 │
+│  type: 'gradient'   type: 'image' │
+│       ↓              ↓            │
+│  LinearGradient  <Image />       │
+│  (Current)       (Future)        │
+└─────────────────┴─────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                        FILE STRUCTURE                             ║
+╚══════════════════════════════════════════════════════════════════╝
+
+japa/
+├── 📁 assets/
+│   └── 📁 beads/                    ← Your PNG files go here
+│       ├── 📄 README.md             ← Designer instructions
+│       ├── 🖼️ sandalwood.png       ← (Future) Custom asset
+│       ├── 🖼️ rudraksha.png        ← (Future) Custom asset
+│       ├── 🖼️ crystal.png          ← (Future) Custom asset
+│       ├── 🖼️ lotus.png            ← (Future) Custom asset
+│       └── 🖼️ tulsi.png            ← (Future) Custom asset
+│
+├── 📁 src/
+│   ├── 📁 constants/
+│   │   └── ⚙️ beadAssets.ts        ← **EDIT THIS FILE TO SWAP**
+│   │
+│   └── 📁 components/
+│       └── 📁 RosaryBead/
+│           └── 🔷 HyperRealisticBead.tsx  ← Smart renderer
+│
+├── 📄 BEAD_REPLACEMENT_GUIDE.md    ← Quick swap guide
+├── 📄 BEAD_ASSET_SYSTEM.md         ← System overview
+└── 📄 VISUAL_GUIDE.txt             ← This file
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                    CONFIGURATION EXAMPLE                          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+File: src/constants/beadAssets.ts
+
+BEFORE (Gradient Mode):
+┌────────────────────────────────────────────────────────────────┐
+│ export const BEAD_ASSETS = {                                   │
+│   sandalwood: {                                                │
+│     type: 'gradient',                                          │
+│     useGradient: true,                                         │
+│   },                                                           │
+│   // ... other beads                                           │
+│ };                                                             │
+└────────────────────────────────────────────────────────────────┘
+
+AFTER (Image Mode):
+┌────────────────────────────────────────────────────────────────┐
+│ export const BEAD_ASSETS = {                                   │
+│   sandalwood: {                                                │
+│     type: 'image',                                             │
+│     image: require('../../assets/beads/sandalwood.png'),       │
+│     activeImage: require('../../assets/beads/sandalwood-glow.png'), │
+│   },                                                           │
+│   // ... other beads                                           │
+│ };                                                             │
+└────────────────────────────────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                         KEY BENEFITS                              ║
+╚══════════════════════════════════════════════════════════════════╝
+
+✅ ZERO CODE CHANGES        │ Just edit one config file
+✅ HOT RELOAD FRIENDLY      │ Changes reflect instantly
+✅ TYPE-SAFE                │ TypeScript prevents errors
+✅ FALLBACK SYSTEM          │ Missing images use gradients
+✅ PERFORMANCE OPTIMIZED    │ Automatic image caching
+✅ FLEXIBLE                 │ Mix gradient & image beads
+✅ PRODUCTION READY NOW     │ Works perfectly with gradients
+✅ FUTURE-PROOF             │ Ready for professional assets
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                       DESIGN REQUIREMENTS                         ║
+╚══════════════════════════════════════════════════════════════════╝
+
+┌──────────────────────────────────────────────────────────────────┐
+│ TECHNICAL SPECS                                                   │
+├──────────────────────────────────────────────────────────────────┤
+│ Format:       PNG with alpha transparency                        │
+│ Size:         1024 x 1024 pixels (square)                        │
+│ DPI:          300+ for best quality                              │
+│ Color Mode:   RGB/RGBA                                           │
+│ File Size:    < 500KB per image (optimize)                       │
+└──────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────┐
+│ VISUAL SPECS                                                      │
+├──────────────────────────────────────────────────────────────────┤
+│ Content:      Single bead, perfectly centered                    │
+│ Background:   Fully transparent (no background)                  │
+│ Lighting:     Natural, soft from top-left (45°)                  │
+│ Highlight:    Specular highlight on upper-left                   │
+│ Shadow:       Subtle drop shadow (included in PNG)               │
+│ Style:        Hyperrealistic, photographic quality               │
+│ Texture:      Wood grain, crystal facets, etc.                   │
+└──────────────────────────────────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                         QUICK REFERENCE                           ║
+╚══════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────┬────────────────────────────────────────┐
+│ QUESTION                │ ANSWER                                 │
+├─────────────────────────┼────────────────────────────────────────┤
+│ Where do images go?     │ assets/beads/                          │
+│ What format?            │ PNG with transparency                  │
+│ What size?              │ 1024x1024px                            │
+│ How many files needed?  │ 5 required, 5 optional (glow)          │
+│ Which file to edit?     │ src/constants/beadAssets.ts            │
+│ How to test?            │ npm start                              │
+│ Does it work now?       │ YES! Using gradients                   │
+│ Breaking changes?       │ NONE - fully backward compatible       │
+└─────────────────────────┴────────────────────────────────────────┘
+
+
+╔══════════════════════════════════════════════════════════════════╗
+║                            STATUS                                 ║
+╚══════════════════════════════════════════════════════════════════╝
+
+Current Implementation:   ✅ COMPLETE & WORKING
+Asset Swap System:        ✅ READY & TESTED
+Documentation:            ✅ COMPREHENSIVE
+Designer Instructions:    ✅ DETAILED
+Developer Guide:          ✅ CLEAR
+Production Ready:         ✅ YES
+Action Required:          ⏸️ NONE (wait for assets)
+
+
+════════════════════════════════════════════════════════════════════
+
+Built for seamless collaboration between developers and designers! 🎨✨
+
+════════════════════════════════════════════════════════════════════
+```
