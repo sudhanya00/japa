@@ -1,6 +1,7 @@
 /**
  * Rosary (mala) bead designs and visual properties
  * Each design represents a different traditional bead type
+ * Names in Hinglish for cultural authenticity
  */
 
 import { RosaryDesign, RosaryType } from '../types';
@@ -15,13 +16,13 @@ export const ROSARY_DESIGNS: Record<RosaryType, RosaryDesign> = {
     glowColor: 'rgba(139, 69, 19, 0.6)',
   },
   
-  quartz: {
-    type: 'quartz',
-    name: 'Crystal Quartz',
-    description: 'Clear quartz beads for clarity and spiritual amplification',
-    primaryColor: '#E8E8E8', // Near white with slight warmth
-    secondaryColor: '#D0D0D0',
-    glowColor: 'rgba(255, 255, 255, 0.8)',
+  sphatik: {
+    type: 'sphatik',
+    name: 'Sphatik',
+    description: 'Crystal quartz beads for clarity and spiritual amplification',
+    primaryColor: '#F0F0F0', // Clear crystal white
+    secondaryColor: '#E0E0E0',
+    glowColor: 'rgba(255, 255, 255, 0.9)',
   },
   
   tulsi: {
@@ -49,6 +50,51 @@ export const ROSARY_DESIGNS: Record<RosaryType, RosaryDesign> = {
     primaryColor: '#9966CC', // Amethyst purple
     secondaryColor: '#7744AA',
     glowColor: 'rgba(153, 102, 204, 0.7)',
+  },
+
+  chandan: {
+    type: 'chandan',
+    name: 'Chandan',
+    description: 'Sandalwood beads for peace, cooling effect, and meditation',
+    primaryColor: '#E8D4A0', // Pale sandalwood yellow
+    secondaryColor: '#D4BC84',
+    glowColor: 'rgba(232, 212, 160, 0.7)',
+  },
+
+  moonga: {
+    type: 'moonga',
+    name: 'Moonga',
+    description: 'Red coral beads for vitality, Mars energy, and courage',
+    primaryColor: '#FF6B6B', // Coral red
+    secondaryColor: '#E85555',
+    glowColor: 'rgba(255, 107, 107, 0.7)',
+  },
+
+  'hakik-red': {
+    type: 'hakik-red',
+    name: 'Hakik (Red)',
+    description: 'Red agate beads for grounding and protection',
+    primaryColor: '#C44536', // Deep red agate
+    secondaryColor: '#A53828',
+    glowColor: 'rgba(196, 69, 54, 0.7)',
+  },
+
+  'hakik-black': {
+    type: 'hakik-black',
+    name: 'Hakik (Black)',
+    description: 'Black agate beads for protection and strength',
+    primaryColor: '#2C2C2C', // Deep black agate
+    secondaryColor: '#1A1A1A',
+    glowColor: 'rgba(100, 100, 100, 0.6)',
+  },
+
+  'hakik-green': {
+    type: 'hakik-green',
+    name: 'Hakik (Green)',
+    description: 'Green agate beads for healing and prosperity',
+    primaryColor: '#4A7C59', // Green agate
+    secondaryColor: '#3A6347',
+    glowColor: 'rgba(74, 124, 89, 0.7)',
   },
 } as const;
 

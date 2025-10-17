@@ -1,30 +1,44 @@
 {
   "expo": {
-    "name": "japa",
-    "slug": "japa",
+    "name": "Japa - Meditation Counter",
+    "slug": "japa-meditation",
     "version": "1.0.0",
+    "description": "Minimalist meditation counter with beautiful mala beads. Track your japa practice with peaceful animations.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#FFF5F0"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sudhanya.japa",
+      "buildNumber": "1"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#FFF5F0"
       },
+      "package": "com.sudhanya.japa",
+      "versionCode": 1,
+      "permissions": [],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "8f40cd7e-83a5-4dc3-84c1-4e82daa48e4a"
+      }
     }
   }
 }

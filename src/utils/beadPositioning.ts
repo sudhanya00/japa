@@ -11,8 +11,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 /**
  * Bead size relative to screen width
  */
-export const BEAD_SIZE = SCREEN_WIDTH * 0.22; // Even bigger beads (22% of screen width)
-export const BEAD_SPACING = BEAD_SIZE * 1.8; // Space between bead centers
+export const BEAD_SIZE = SCREEN_WIDTH * 0.20; // Slightly smaller for smoother motion
+export const BEAD_SPACING = BEAD_SIZE * 1.72; // Tighten spacing a bit
 export const VISIBLE_BEADS = 12; // Number of beads visible in horizontal strip
 export const TOTAL_BEADS = 108; // Traditional mala count
 
@@ -98,8 +98,9 @@ export const getVisibleBeads = (
   // Each tap scrolls by one bead width
   const baseOffset = count * BEAD_SPACING;
   
-  // Add smooth animation offset (can be used for auto-rotation)
-  const totalOffset = baseOffset + animationTime;
+  // If an absolute animated offset is provided (e.g., Animated drives count * SPACING), use it directly.
+  // Otherwise, fall back to baseOffset + incremental animationTime
+  const totalOffset = animationTime !== 0 ? animationTime : baseOffset + animationTime;
   
   // Generate enough beads to fill screen + some overflow
   const beadsToRender = VISIBLE_BEADS + 4; // Extra for smooth edges

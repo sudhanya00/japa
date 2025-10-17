@@ -297,8 +297,60 @@ See `WEEK2_DESIGN.md` for full plan.
 
 ---
 
-**Build status**: 🟢 All systems working  
-**Performance**: ⚠️ Not yet optimized (animations pending)  
-**Visual**: 🎨 Beads visible and positioned correctly
+## ✅ NEW: Session History Feature (COMPLETE!)
 
-**Let's make it smooth!** 🙏
+**Location**: [`src/components/History/SessionHistory.tsx`](src/components/History/SessionHistory.tsx)
+
+### Features Implemented
+- ✅ **30-day contribution graph** (GitHub-style calendar with color intensity)
+- ✅ **5 intensity levels** (0, 1-107, 108-215, 216-431, 432+ japa)
+- ✅ **Statistics dashboard**:
+  - Total sessions count
+  - Total japa count (lifetime)
+  - Total meditation time (hours)
+  - Current streak (consecutive days)
+- ✅ **Detailed session list** (scrollable, last 10 visible)
+  - Date & time stamps
+  - Japa count per session
+  - Duration in minutes
+  - Rosary type used
+  - Personal notes (optional reflections)
+- ✅ **90-day rolling history** (auto-cleanup old data)
+- ✅ **Theme-aware colors** (adapts to light/dark/twilight)
+- ✅ **Empty state** (friendly message for first-time users)
+- ✅ **Access button** (📊 icon in top-left corner)
+
+### Visual Design
+```
+┌─────────────────────────────────┐
+│ Session History              ✕  │
+├─────────────────────────────────┤
+│  42      1,296    21h     7     │
+│Sessions  Japa    Time   Streak  │
+├─────────────────────────────────┤
+│ Last 30 Days                    │
+│ ▢ ▢ ▢ ■ ▢ ▣ ▣ ■ ▢ ▣ ▣ ■ ...     │
+│ Less ▢ ▣ ▣ ■ ■ More            │
+├─────────────────────────────────┤
+│ Recent Sessions                 │
+│ ┌─────────────────────────────┐ │
+│ │ Oct 15  •  7:30 PM          │ │
+│ │ 108 japa  45m  rudraksh     │ │
+│ │ "Peaceful evening session"  │ │
+│ └─────────────────────────────┘ │
+└─────────────────────────────────┘
+```
+
+### Data Storage
+- **90 days of history** (rolling window)
+- **Max 100 sessions** stored locally
+- **AsyncStorage** persistence
+- **Privacy-first** (no cloud sync, all local)
+
+---
+
+**Build status**: 🟢 All systems working + Session History LIVE!  
+**Performance**: ✅ Optimized (viewport culling, memoization)  
+**Visual**: 🎨 Complete with 3D beads, animations, and history tracking
+
+**Ready for production!** 🙏✨
