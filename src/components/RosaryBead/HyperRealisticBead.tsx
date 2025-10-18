@@ -5,7 +5,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Image, Easing } from 'react-native';
+import { Animated, StyleSheet, Image, Easing, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '../../store/appStore';
 import { ROSARY_DESIGNS } from '../../constants/rosaryDesigns';
@@ -16,6 +16,8 @@ import type { BeadPosition } from '../../utils/beadPositioning';
 interface HyperRealisticBeadProps {
   position: BeadPosition;
   isActive?: boolean;
+  // Bumped whenever a milestone (108, 216, ...) is reached; triggers a pulse
+  milestoneTrigger?: number;
 }
 
 // Global breathing animation - outward pulse only (vignette effect)
@@ -46,16 +48,13 @@ if (!globalBreathingAnimation) {
 }
 
 export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
-  ({ position, isActive }) => {
+  ({ position, isActive, milestoneTrigger }) => {
     const rosaryType = useAppStore(state => state.rosaryType);
     const design = ROSARY_DESIGNS[rosaryType];
     const beadAsset = getBeadAsset(rosaryType);
 
-    // Animated values for smooth transitions
-    const animatedX = useRef(new Animated.Value(position.x)).current;
-    const animatedY = useRef(new Animated.Value(position.y)).current;
-    const animatedScale = useRef(new Animated.Value(position.scale)).current;
-    const animatedOpacity = useRef(new Animated.Value(position.opacity)).current;
+    // Pulse scale only (avoid per-bead position animations for performance)
+    const pulseScale = useRef(new Animated.Value(1)).current;
     
     // Use global breathing animation (shared across all beads)
     const breathingGlow = globalBreathingGlow;
@@ -73,34 +72,28 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
       }).start();
     }, [position.isCenterBead, glowVisibility]);
 
-    // Animate to new position
+    // No per-bead position animations; positions update from parent offset re-render
+
+    // Milestone pulse for active bead only
     useEffect(() => {
-      Animated.parallel([
-        Animated.spring(animatedX, {
-          toValue: position.x,
+      if (!isActive || milestoneTrigger === undefined) return;
+      pulseScale.setValue(1);
+      Animated.sequence([
+        Animated.timing(pulseScale, {
+          toValue: 1.08,
+          duration: 160,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: false,
-          friction: 8,
-          tension: 40,
         }),
-        Animated.spring(animatedY, {
-          toValue: position.y,
-          useNativeDriver: false,
-          friction: 8,
-          tension: 40,
-        }),
-        Animated.spring(animatedScale, {
-          toValue: position.scale,
-          useNativeDriver: false,
-          friction: 8,
-          tension: 40,
-        }),
-        Animated.timing(animatedOpacity, {
-          toValue: position.opacity,
-          duration: 300,
+        Animated.timing(pulseScale, {
+          toValue: 1,
+          duration: 160,
+          easing: Easing.out(Easing.quad),
           useNativeDriver: false,
         }),
       ]).start();
-    }, [position.x, position.y, position.scale, position.opacity]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [milestoneTrigger, isActive]);
 
     // Calculate actual bead size with perspective scale
     const scaledSize = BEAD_SIZE * position.scale;
@@ -108,18 +101,12 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
     // Animated position style
     const containerStyle = {
       position: 'absolute' as const,
-      left: animatedX.interpolate({
-        inputRange: [0, 1000],
-        outputRange: [0 - scaledSize / 2, 1000 - scaledSize / 2],
-      }),
-      top: animatedY.interpolate({
-        inputRange: [0, 1000],
-        outputRange: [0 - scaledSize / 2, 1000 - scaledSize / 2],
-      }),
+      left: position.x - scaledSize / 2,
+      top: position.y - scaledSize / 2,
       width: scaledSize,
       height: scaledSize,
-      opacity: animatedOpacity,
       zIndex: position.zIndex,
+      transform: [{ scale: Animated.multiply(pulseScale, 1) }],
     };
 
     // Render image-based bead
@@ -130,14 +117,27 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
 
       return (
         <Animated.View style={containerStyle}>
+          {/* Opaque occluder to hide thread under bead */}
+          <View
+            style={{
+              position: 'absolute',
+              left: 0,
+              top: 0,
+              width: scaledSize,
+              height: scaledSize,
+              borderRadius: scaledSize / 2,
+              backgroundColor: design.primaryColor,
+            }}
+          />
           {/* Inner vignette glow effect - stays around the bead */}
-          <>
-            {/* Generate 20 concentric glow rings for vignette effect (optimized from 30) */}
-            {Array.from({ length: 20 }).map((_, index) => {
+          {/* Only render glow rings for center/active bead */}
+          {position.isCenterBead && (
+            <>
+            {Array.from({ length: 8 }).map((_, index) => {
               // Tighter spread - max 4x bead size (vignette effect)
               const ringSize = scaledSize * (1.0 + index * 0.15);
               // Lower brightness, faster fade
-              const baseOpacity = 0.03 - (index * 0.0012);
+              const baseOpacity = 0.04 - (index * 0.003);
               
               return (
                 <Animated.View
@@ -164,7 +164,8 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
                 />
               );
             })}
-          </>
+            </>
+          )}
 
           {/* Custom image asset */}
           <Image
@@ -174,6 +175,7 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
               {
                 width: scaledSize,
                 height: scaledSize,
+                opacity: position.opacity,
               },
             ]}
             resizeMode="contain"
@@ -192,6 +194,18 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
 
     return (
       <Animated.View style={containerStyle}>
+        {/* Opaque occluder to hide thread under bead */}
+        <View
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: scaledSize,
+            height: scaledSize,
+            borderRadius: scaledSize / 2,
+            backgroundColor: design.primaryColor,
+          }}
+        />
         {/* Main bead sphere with gradient */}
         <LinearGradient
           colors={gradientColors}
@@ -201,19 +215,21 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
               width: scaledSize,
               height: scaledSize,
               borderRadius: scaledSize / 2,
+              opacity: position.opacity,
             },
           ]}
           start={{ x: 0.3, y: 0.2 }} // Top-left highlight
           end={{ x: 0.7, y: 0.9 }} // Bottom-right shadow
         >
           {/* Inner vignette glow effect - stays around the bead */}
-          <>
-            {/* Generate 20 concentric glow rings for vignette effect (optimized from 30) */}
-            {Array.from({ length: 20 }).map((_, index) => {
+          {/* Only render glow rings for center/active bead */}
+          {position.isCenterBead && (
+            <>
+            {Array.from({ length: 8 }).map((_, index) => {
               // Tighter spread - max 4x bead size (vignette effect)
               const ringSize = scaledSize * (1.0 + index * 0.15);
               // Lower brightness, faster fade
-              const baseOpacity = 0.03 - (index * 0.0012);
+              const baseOpacity = 0.04 - (index * 0.003);
               
               return (
                 <Animated.View
@@ -240,7 +256,8 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
                 />
               );
             })}
-          </>
+            </>
+          )}
         </LinearGradient>
       </Animated.View>
     );

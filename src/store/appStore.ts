@@ -1,10 +1,10 @@
 /**
  * Zustand store for app state management
- * Includes automatic persistence to AsyncStorage
+ * Includes automatic persistence to localStorage (web)
  */
 
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import webStorage from '../utils/webStorage';
 import { AppState, RosaryType, Theme, HapticIntensity, SessionRecord } from '../types';
 import { DEFAULT_ROSARY_TYPE } from '../constants/rosaryDesigns';
 import { BEADS_PER_SET, MAX_COUNT } from '../constants/hapticPatterns';
@@ -20,11 +20,10 @@ const initialState = {
   sessionStartTime: null,
   sessionHistory: [],
   rosaryType: DEFAULT_ROSARY_TYPE as RosaryType,
-  theme: 'dark' as Theme,
+  theme: 'twilight' as Theme, // Default to warm twilight theme
   hapticIntensity: 'gentle' as HapticIntensity,
   screenBrightness: 0.5,
   isInDimMode: false,
-  autoRotate: false, // Auto-rotation off by default
 };
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -32,7 +31,12 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   // Counter actions
   incrementCount: () => {
-    const { count } = get();
+    const { count, sessionStartTime } = get();
+    
+    // Auto-start session on first tap if not already started
+    if (count === 0 && !sessionStartTime) {
+      set({ sessionStartTime: Date.now() });
+    }
     
     // No limit - allow unlimited counting!
     const newCount = count + 1;
@@ -95,11 +99,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     set(state => ({ isInDimMode: !state.isInDimMode }));
   },
 
-  toggleAutoRotate: () => {
-    set(state => ({ autoRotate: !state.autoRotate }));
-    get().saveState();
-  },
-
   setTotalSets: (totalSets: number) => {
     set({ totalSets: Math.max(1, Math.min(4, totalSets)) });
     get().saveState();
@@ -115,33 +114,45 @@ export const useAppStore = create<AppState>((set, get) => ({
     get().saveState();
   },
 
-  endSession: async () => {
+  endSession: async (notes?: string) => {
     const { count, sessionStartTime, rosaryType, sessionHistory } = get();
     
-    if (!sessionStartTime || count === 0) {
+    // Don't save if count is 0
+    if (count === 0) {
       return;
     }
     
-    const duration = Math.round((Date.now() - sessionStartTime) / 60000); // minutes
+    // Calculate duration (use sessionStartTime if available, otherwise estimate 1 minute per 10 japa)
+    const duration = sessionStartTime 
+      ? Math.round((Date.now() - sessionStartTime) / 60000) // minutes from start
+      : Math.max(1, Math.round(count / 10)); // estimate: ~10 japa per minute
     
     const newRecord: SessionRecord = {
       date: new Date().toISOString(),
       count,
       duration,
       rosaryType,
+      notes,
     };
     
-    // Keep only last 7 days of history
-    const updatedHistory = [newRecord, ...sessionHistory].slice(0, 7);
+    // Keep last 90 days of history (3 months)
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - 90);
+    
+    const updatedHistory = [newRecord, ...sessionHistory]
+      .filter(record => new Date(record.date) >= cutoffDate)
+      .slice(0, 100); // Max 100 sessions
     
     set({ 
       sessionHistory: updatedHistory,
       sessionStartTime: null,
+      count: 0, // Reset counter after saving session
+      currentSet: 1,
     });
     
     // Save session history separately
     try {
-      await AsyncStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(updatedHistory));
+      await webStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(updatedHistory));
     } catch (error) {
       console.error('Failed to save session history:', error);
     }
@@ -153,8 +164,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   loadState: async () => {
     try {
       const [stateJson, historyJson] = await Promise.all([
-        AsyncStorage.getItem(STORAGE_KEY),
-        AsyncStorage.getItem(SESSION_HISTORY_KEY),
+        webStorage.getItem(STORAGE_KEY),
+        webStorage.getItem(SESSION_HISTORY_KEY),
       ]);
       
       if (stateJson) {
@@ -184,10 +195,9 @@ export const useAppStore = create<AppState>((set, get) => ({
         hapticIntensity: state.hapticIntensity,
         screenBrightness: state.screenBrightness,
         isInDimMode: state.isInDimMode,
-        autoRotate: state.autoRotate,
       };
       
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+      await webStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
     } catch (error) {
       console.error('Failed to save state:', error);
     }

@@ -2,7 +2,17 @@
  * Core type definitions for Japa app
  */
 
-export type RosaryType = 'rudraksh' | 'quartz' | 'tulsi' | 'kamal-gatta' | 'amethyst';
+export type RosaryType = 
+  | 'rudraksh' 
+  | 'sphatik' 
+  | 'tulsi' 
+  | 'kamal-gatta' 
+  | 'amethyst'
+  | 'chandan'
+  | 'moonga'
+  | 'hakik-red'
+  | 'hakik-black'
+  | 'hakik-green';
 
 export type Theme = 'light' | 'dark' | 'twilight';
 
@@ -26,7 +36,6 @@ export interface AppState {
   hapticIntensity: HapticIntensity;
   screenBrightness: number; // 0.2-1.0
   isInDimMode: boolean;
-  autoRotate: boolean; // Auto-rotation mode for ambient meditation
   
   // Actions
   incrementCount: () => void;
@@ -37,10 +46,9 @@ export interface AppState {
   setHapticIntensity: (intensity: HapticIntensity) => void;
   setScreenBrightness: (brightness: number) => void;
   toggleDimMode: () => void;
-  toggleAutoRotate: () => void;
   setTotalSets: (sets: number) => void;
   startSession: () => void;
-  endSession: () => void;
+  endSession: (notes?: string) => void;
   loadState: () => Promise<void>;
   saveState: () => Promise<void>;
 }
@@ -50,6 +58,7 @@ export interface SessionRecord {
   count: number;
   duration: number; // in minutes
   rosaryType: RosaryType;
+  notes?: string;
 }
 
 export interface HapticPattern {

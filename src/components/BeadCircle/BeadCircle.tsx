@@ -4,97 +4,100 @@
  * Continuous smooth rotation with perspective depth
  */
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Animated, Dimensions } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Defs, Mask, Rect, Circle } from 'react-native-svg';
 import { useAppStore } from '../../store/appStore';
 import { HyperRealisticBead } from '../RosaryBead/HyperRealisticBead';
-import { getVisibleBeads, BEAD_STRIP_Y, BEAD_SPACING } from '../../utils/beadPositioning';
+import { getVisibleBeads, BEAD_STRIP_Y, BEAD_SPACING, BEAD_SIZE } from '../../utils/beadPositioning';
+import { ROSARY_DESIGNS } from '../../constants/rosaryDesigns';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export const BeadCircle: React.FC = () => {
   const count = useAppStore(state => state.count);
-  const autoRotate = useAppStore(state => state.autoRotate);
+  const rosaryType = useAppStore(state => state.rosaryType);
   const animatedOffset = useRef(new Animated.Value(0)).current;
-  const autoRotateAnimation = useRef<Animated.CompositeAnimation | null>(null);
+  const [currentOffset, setCurrentOffset] = useState(0);
 
-  // Animate to new position when count changes (manual tap)
+  // Animate to new position when count changes (tap)
   useEffect(() => {
-    if (!autoRotate) {
-      Animated.spring(animatedOffset, {
-        toValue: count * BEAD_SPACING,
-        useNativeDriver: false,
-        friction: 8,
-        tension: 40,
-      }).start();
-    }
-  }, [count, autoRotate]);
+    Animated.spring(animatedOffset, {
+      toValue: count * BEAD_SPACING,
+      useNativeDriver: false,
+      friction: 8,
+      tension: 40,
+    }).start();
+  }, [count]);
 
-  // Auto-rotation continuous animation
+  // Keep a numeric snapshot of the animated offset to feed layout calculation
   useEffect(() => {
-    if (autoRotate) {
-      // Stop any existing tap animation
-      animatedOffset.stopAnimation((currentValue) => {
-        // Create continuous rotation from current position
-        autoRotateAnimation.current = Animated.loop(
-          Animated.timing(animatedOffset, {
-            toValue: currentValue + (BEAD_SPACING * 108), // One full rotation (108 beads)
-            duration: 60000, // 60 seconds for full rotation (slow, meditative)
-            useNativeDriver: false,
-          })
-        );
-        autoRotateAnimation.current.start();
-      });
-    } else {
-      // Stop auto-rotation when disabled
-      if (autoRotateAnimation.current) {
-        autoRotateAnimation.current.stop();
-        autoRotateAnimation.current = null;
-      }
-    }
-
+    const id = animatedOffset.addListener(({ value }) => setCurrentOffset(value));
     return () => {
-      if (autoRotateAnimation.current) {
-        autoRotateAnimation.current.stop();
-      }
+      animatedOffset.removeListener(id);
     };
-  }, [autoRotate]);
+  }, [animatedOffset]);
 
-  // Get visible beads for horizontal strip
-  const visibleBeads = getVisibleBeads(count, 0);
+  // Get visible beads for horizontal strip using the animated offset
+  const visibleBeads = getVisibleBeads(count, currentOffset);
 
   // Active bead index (the one being counted)
   // The active bead is always the current count (no cycling)
   const activeBeadIndex = count;
 
-  // Generate curved path through all beads matching their arc
+  // Generate threaded path by sampling the exact bead arc formula
   const generateThreadPath = () => {
-    const startX = -200;
-    const endX = SCREEN_WIDTH + 200;
     const centerX = SCREEN_WIDTH / 2;
     const centerY = BEAD_STRIP_Y;
     const curveDepth = 20; // Same as bead positioning curve
-    
-    // The beads use: y = BEAD_STRIP_Y + (normalizedX^2) * curveDepth
-    // We need a quadratic Bézier curve that matches this parabola
-    
-    // For quadratic Bézier: control point should be at center
-    const controlX = centerX;
-    const controlY = centerY + curveDepth; // Bottom of the curve (beads dip down)
-    
-    // Create smooth downward curve (like a smile/arc)
-    return `M ${startX},${centerY} Q ${controlX},${controlY} ${endX},${centerY}`;
+
+    const step = 16; // pixels between samples
+    let path = '';
+    for (let x = -200; x <= SCREEN_WIDTH + 200; x += step) {
+      const normalizedX = (x - centerX) / (SCREEN_WIDTH / 2); // -1..1
+      const y = centerY + Math.pow(Math.abs(normalizedX), 2) * curveDepth;
+      path += path.length === 0 ? `M ${x},${y}` : ` L ${x},${y}`;
+    }
+    return path;
   };
+
+  const design = ROSARY_DESIGNS[rosaryType];
+  const isMilestone = count > 0 && count % 108 === 0;
 
   return (
     <View style={styles.container} pointerEvents="none">
+      {/* Thread curve behind beads with mask to avoid drawing under beads */}
+      <Svg pointerEvents="none" width={SCREEN_WIDTH} height={SCREEN_HEIGHT} style={StyleSheet.absoluteFill}>
+        <Defs>
+          <Mask id="threadMask">
+            {/* Start with full visibility */}
+            <Rect x="0" y="0" width={SCREEN_WIDTH} height={SCREEN_HEIGHT} fill="#ffffff" />
+            {/* Punch holes where beads are (so thread is hidden under them) */}
+            {visibleBeads.map(b => {
+              const radius = (BEAD_SIZE * b.scale * 0.5) * 0.96; // actual bead radius, slightly inset
+              return (
+                <Circle key={`mask-${b.index}`} cx={b.x} cy={b.y} r={radius} fill="#000000" />
+              );
+            })}
+          </Mask>
+        </Defs>
+        <Path
+          d={generateThreadPath()}
+          stroke={design.secondaryColor}
+          strokeOpacity={0.45}
+          strokeWidth={2}
+          fill="none"
+          mask="url(#threadMask)"
+        />
+      </Svg>
+
       {/* Render visible beads */}
       {visibleBeads.map((beadPosition) => (
         <HyperRealisticBead
           key={beadPosition.index}
           position={beadPosition}
           isActive={beadPosition.index === activeBeadIndex}
+          milestoneTrigger={isMilestone ? count : undefined}
         />
       ))}
     </View>

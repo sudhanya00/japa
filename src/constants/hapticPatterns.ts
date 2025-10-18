@@ -12,10 +12,10 @@ export const HAPTIC_PATTERNS = {
     intensity: 'light' as const,
   },
   
-  // Milestone reached (108, 216, 324, 432) - more pronounced
+  // Milestone reached (108, 216, 324, 432) - more pronounced and longer
   MILESTONE: {
     type: 'notification' as const,
-    intensity: 'medium' as const,
+    intensity: 'heavy' as const,
   },
   
   // Set completion (108 beads) - distinct celebration
