@@ -71,11 +71,18 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   card: {
+    width: '100%',
+    maxWidth: 480,
     padding: 20,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
