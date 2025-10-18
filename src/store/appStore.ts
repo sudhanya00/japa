@@ -1,10 +1,10 @@
 /**
  * Zustand store for app state management
- * Includes automatic persistence to AsyncStorage
+ * Includes automatic persistence to localStorage (web)
  */
 
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import webStorage from '../utils/webStorage';
 import { AppState, RosaryType, Theme, HapticIntensity, SessionRecord } from '../types';
 import { DEFAULT_ROSARY_TYPE } from '../constants/rosaryDesigns';
 import { BEADS_PER_SET, MAX_COUNT } from '../constants/hapticPatterns';
@@ -152,7 +152,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     
     // Save session history separately
     try {
-      await AsyncStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(updatedHistory));
+      await webStorage.setItem(SESSION_HISTORY_KEY, JSON.stringify(updatedHistory));
     } catch (error) {
       console.error('Failed to save session history:', error);
     }
@@ -164,8 +164,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   loadState: async () => {
     try {
       const [stateJson, historyJson] = await Promise.all([
-        AsyncStorage.getItem(STORAGE_KEY),
-        AsyncStorage.getItem(SESSION_HISTORY_KEY),
+        webStorage.getItem(STORAGE_KEY),
+        webStorage.getItem(SESSION_HISTORY_KEY),
       ]);
       
       if (stateJson) {
@@ -197,7 +197,7 @@ export const useAppStore = create<AppState>((set, get) => ({
         isInDimMode: state.isInDimMode,
       };
       
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
+      await webStorage.setItem(STORAGE_KEY, JSON.stringify(stateToSave));
     } catch (error) {
       console.error('Failed to save state:', error);
     }

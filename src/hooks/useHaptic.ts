@@ -1,12 +1,10 @@
 /**
  * Custom hook for haptic feedback
  * Provides tactile responses based on app state and user preferences
- * Using Expo Haptics for compatibility with Expo Go
+ * Using Web Vibration API for web platform
  */
 
 import { useCallback } from 'react';
-import { Platform, Vibration } from 'react-native';
-import * as Haptics from 'expo-haptics';
 import { useAppStore } from '../store/appStore';
 import { HAPTIC_PATTERNS, MILESTONES } from '../constants/hapticPatterns';
 
@@ -17,6 +15,11 @@ export const useHaptic = () => {
     // Skip if haptics are disabled
     if (hapticIntensity === 'off') {
       return;
+    }
+
+    // Check if browser supports Vibration API
+    if (!navigator.vibrate) {
+      return; // Gracefully degrade if not supported
     }
 
     const pattern = HAPTIC_PATTERNS[patternKey];
@@ -33,30 +36,23 @@ export const useHaptic = () => {
         ? pattern.intensity
         : undefined;
 
-    // Trigger appropriate haptic feedback using Expo Haptics
+    // Trigger appropriate haptic feedback using Web Vibration API
     if (pattern.type === 'impact') {
       // Light impact for normal taps
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      navigator.vibrate(10); // 10ms vibration
     } else if (pattern.type === 'notification') {
       // Stronger feedback for notifications/milestones
       if (adjustedIntensity === 'heavy') {
         // Longer, more distinct sequence for milestones
-        if (Platform.OS === 'android') {
-          // Custom vibration pattern on Android (durations in ms)
-          // 0ms delay, 60ms vibrate, 40ms pause, 90ms vibrate
-          Vibration.vibrate([0, 60, 40, 90], false);
-        } else {
-          (async () => {
-            await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-          })();
-        }
+        // Pattern: [vibrate, pause, vibrate, pause, vibrate]
+        navigator.vibrate([60, 40, 90]); // ms
       } else {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        // Medium notification
+        navigator.vibrate([30, 20, 30]); // ms
       }
     } else if (pattern.type === 'selection') {
-      // Selection feedback
-      Haptics.selectionAsync();
+      // Selection feedback - very brief
+      navigator.vibrate(5); // 5ms vibration
     }
   }, [hapticIntensity]);
 
