@@ -6,7 +6,7 @@ A minimalist web app for tracking japa meditation with beautiful, realistic mala
 
 
 
-**Live Demo**: https://japa-fk5zkhmkg-sudhanyas-projects.vercel.app> Minimalist web meditation counter with beautiful mala beadsA premium, meditation-focused japa (mantra recitation) counting application built with React Native.
+**Live Demo**: https://japa-nine.vercel.app/ Minimalist web meditation counter with beautiful mala beadsA premium, meditation-focused japa (mantra recitation) counting application built with React Native.
 
 
 
