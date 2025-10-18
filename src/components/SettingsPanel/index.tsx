@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    width: '100%',
   },
   card: {
     width: '100%',
@@ -84,6 +85,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',

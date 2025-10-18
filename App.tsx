@@ -37,6 +37,20 @@ export default function App() {
   // Check if there's an unsaved session
   const hasUnsavedSession = count > 0 && sessionStartTime !== null;
 
+  // Set viewport meta tag for web to prevent zoom and ensure proper mobile rendering
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      let viewport = document.querySelector('meta[name=viewport]');
+      if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no');
+      }
+      // Prevent text size adjustment on iOS
+      document.documentElement.style.webkitTextSizeAdjust = '100%';
+      // Disable pull-to-refresh on mobile
+      document.body.style.overscrollBehavior = 'none';
+    }
+  }, []);
+
   // Load persisted state on mount
   useEffect(() => {
     loadState();
@@ -205,6 +219,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
+    height: '100%',
     alignItems: 'center',
     justifyContent: 'flex-start', // Start from top, spacer will push counter to bottom
   },

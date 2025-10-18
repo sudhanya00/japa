@@ -46,7 +46,8 @@
       "display": "standalone",
       "startUrl": "/",
       "lang": "en",
-      "bundler": "metro"
+      "bundler": "metro",
+      "template": "./web/index.html"
     },
     "extra": {
       "eas": {

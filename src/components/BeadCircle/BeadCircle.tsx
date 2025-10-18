@@ -9,7 +9,7 @@ import { View, StyleSheet, Animated, Dimensions } from 'react-native';
 import Svg, { Path, Defs, Mask, Rect, Circle } from 'react-native-svg';
 import { useAppStore } from '../../store/appStore';
 import { HyperRealisticBead } from '../RosaryBead/HyperRealisticBead';
-import { getVisibleBeads, BEAD_STRIP_Y, BEAD_SPACING, BEAD_SIZE } from '../../utils/beadPositioning';
+import { getVisibleBeads, BEAD_SPACING } from '../../utils/beadPositioning';
 import { ROSARY_DESIGNS } from '../../constants/rosaryDesigns';
 
 export const BeadCircle: React.FC = () => {
@@ -31,15 +31,20 @@ export const BeadCircle: React.FC = () => {
   const animatedOffset = useRef(new Animated.Value(0)).current;
   const [currentOffset, setCurrentOffset] = useState(0);
 
+  // Calculate dynamic bead dimensions based on screen size
+  const beadSize = screenDimensions.width * 0.20;
+  const beadSpacing = beadSize * 1.72;
+  const beadStripY = screenDimensions.height * 0.45;
+
   // Animate to new position when count changes (tap)
   useEffect(() => {
     Animated.spring(animatedOffset, {
-      toValue: count * BEAD_SPACING,
+      toValue: count * beadSpacing,
       useNativeDriver: false,
       friction: 8,
       tension: 40,
     }).start();
-  }, [count]);
+  }, [count, beadSpacing]);
 
   // Keep a numeric snapshot of the animated offset to feed layout calculation
   useEffect(() => {
@@ -59,7 +64,7 @@ export const BeadCircle: React.FC = () => {
   // Generate threaded path by sampling the exact bead arc formula
   const generateThreadPath = () => {
     const centerX = screenDimensions.width / 2;
-    const centerY = BEAD_STRIP_Y;
+    const centerY = beadStripY;
     const curveDepth = 20; // Same as bead positioning curve
 
     const step = 16; // pixels between samples
@@ -85,7 +90,7 @@ export const BeadCircle: React.FC = () => {
             <Rect x="0" y="0" width={screenDimensions.width} height={screenDimensions.height} fill="#ffffff" />
             {/* Punch holes where beads are (so thread is hidden under them) */}
             {visibleBeads.map(b => {
-              const radius = (BEAD_SIZE * b.scale * 0.5) * 0.96; // actual bead radius, slightly inset
+              const radius = Math.max(1, (beadSize * b.scale * 0.5) * 0.96); // actual bead radius, slightly inset, min 1px
               return (
                 <Circle key={`mask-${b.index}`} cx={b.x} cy={b.y} r={radius} fill="#000000" />
               );

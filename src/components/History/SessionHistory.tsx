@@ -271,6 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
     alignItems: 'center',
+    width: '100%',
   },
   container: {
     width: '100%',
@@ -280,6 +281,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     padding: 20,
     paddingBottom: 40,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',

@@ -5,11 +5,10 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, Image, Easing, View } from 'react-native';
+import { Animated, StyleSheet, Image, Easing, View, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '../../store/appStore';
 import { ROSARY_DESIGNS } from '../../constants/rosaryDesigns';
-import { BEAD_SIZE } from '../../utils/beadPositioning';
 import { getBeadAsset } from '../../constants/beadAssets';
 import type { BeadPosition } from '../../utils/beadPositioning';
 
@@ -52,6 +51,9 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
     const rosaryType = useAppStore(state => state.rosaryType);
     const design = ROSARY_DESIGNS[rosaryType];
     const beadAsset = getBeadAsset(rosaryType);
+
+    // Calculate dynamic BEAD_SIZE based on current screen width
+    const BEAD_SIZE = Dimensions.get('window').width * 0.20;
 
     // Pulse scale only (avoid per-bead position animations for performance)
     const pulseScale = useRef(new Animated.Value(1)).current;
@@ -96,7 +98,7 @@ export const HyperRealisticBead: React.FC<HyperRealisticBeadProps> = React.memo(
     }, [milestoneTrigger, isActive]);
 
     // Calculate actual bead size with perspective scale
-    const scaledSize = BEAD_SIZE * position.scale;
+    const scaledSize = Math.max(1, BEAD_SIZE * position.scale); // Ensure minimum size of 1px
 
     // Animated position style
     const containerStyle = {
