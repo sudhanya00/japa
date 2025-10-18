@@ -5,19 +5,24 @@
 
 import { Dimensions } from 'react-native';
 
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+// Get current screen dimensions dynamically
+const getDimensions = () => Dimensions.get('window');
 
 // Layout constants for infinite horizontal loop
 /**
  * Bead size relative to screen width
  */
-export const BEAD_SIZE = SCREEN_WIDTH * 0.20; // Slightly smaller for smoother motion
-export const BEAD_SPACING = BEAD_SIZE * 1.72; // Tighten spacing a bit
+const getBEAD_SIZE = () => getDimensions().width * 0.20;
+const getBEAD_SPACING = () => getBEAD_SIZE() * 1.72;
+const getBEAD_STRIP_Y = () => getDimensions().height * 0.45;
+
+// Export legacy constants for components that need them (will update dynamically)
+export const BEAD_SIZE = getBEAD_SIZE();
+export const BEAD_SPACING = getBEAD_SPACING();
+export const BEAD_STRIP_Y = getBEAD_STRIP_Y();
+
 export const VISIBLE_BEADS = 12; // Number of beads visible in horizontal strip
 export const TOTAL_BEADS = 108; // Traditional mala count
-
-// Vertical position (horizontal strip across center)
-export const BEAD_STRIP_Y = SCREEN_HEIGHT * 0.45; // Center of screen
 
 // Perspective depth range
 export const MIN_SCALE = 0.4; // Beads at edges (far away)
@@ -43,9 +48,13 @@ export const getBeadPosition = (
   index: number,
   offset: number = 0
 ): BeadPosition => {
+  const { width: SCREEN_WIDTH } = getDimensions();
+  const beadSpacing = getBEAD_SPACING();
+  const beadStripY = getBEAD_STRIP_Y();
+  
   // Calculate horizontal position - no wrapping, infinite beads!
   // Each bead has its own unique position
-  const baseX = index * BEAD_SPACING;
+  const baseX = index * beadSpacing;
   const x = SCREEN_WIDTH / 2 + (baseX - offset);
   
   // Position relative to screen center
@@ -55,7 +64,7 @@ export const getBeadPosition = (
   // Create gentle arc - beads dip slightly in center
   const normalizedX = centerOffset / (SCREEN_WIDTH / 2); // -1 to 1
   const curveDepth = 20; // pixels
-  const y = BEAD_STRIP_Y + Math.pow(Math.abs(normalizedX), 2) * curveDepth;
+  const y = beadStripY + Math.pow(Math.abs(normalizedX), 2) * curveDepth;
   
   // Perspective scale - center beads are larger (closer to camera)
   const distanceFromCenter = Math.abs(normalizedX);
@@ -69,7 +78,7 @@ export const getBeadPosition = (
   
   // Check if this is the center/focal bead - looser tolerance for visibility
   // Bead within 40% of bead spacing from center
-  const isCenterBead = Math.abs(centerOffset) < BEAD_SPACING * 0.4;
+  const isCenterBead = Math.abs(centerOffset) < beadSpacing * 0.4;
   
   return {
     x,
@@ -93,10 +102,11 @@ export const getVisibleBeads = (
   animationTime: number = 0
 ): BeadPosition[] => {
   const beads: BeadPosition[] = [];
+  const beadSpacing = getBEAD_SPACING();
   
   // Calculate scroll offset based on count
   // Each tap scrolls by one bead width
-  const baseOffset = count * BEAD_SPACING;
+  const baseOffset = count * beadSpacing;
   
   // If an absolute animated offset is provided (e.g., Animated drives count * SPACING), use it directly.
   // Otherwise, fall back to baseOffset + incremental animationTime
@@ -130,7 +140,9 @@ export const getVisibleBeads = (
  * @returns True if bead should be rendered
  */
 export const isBeadVisible = (position: BeadPosition): boolean => {
-  const buffer = BEAD_SIZE * 2;
+  const { width: SCREEN_WIDTH } = getDimensions();
+  const beadSize = getBEAD_SIZE();
+  const buffer = beadSize * 2;
   
   return (
     position.x > -buffer &&
@@ -146,17 +158,15 @@ export const isBeadVisible = (position: BeadPosition): boolean => {
  * @returns Position of the active bead
  */
 export const getActiveBeadPosition = (count: number): BeadPosition => {
+  const beadSpacing = getBEAD_SPACING();
   const currentBeadIndex = count % TOTAL_BEADS;
-  return getBeadPosition(currentBeadIndex, count * BEAD_SPACING);
+  return getBeadPosition(currentBeadIndex, count * beadSpacing);
 };
 
 /**
  * Get screen dimensions (useful for responsive calculations)
  */
-export const getScreenDimensions = () => ({
-  width: SCREEN_WIDTH,
-  height: SCREEN_HEIGHT,
-});
+export const getScreenDimensions = () => getDimensions();
 
 /**
  * Calculate animation progress based on count

@@ -205,8 +205,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
     alignItems: 'center',
     justifyContent: 'flex-start', // Start from top, spacer will push counter to bottom
   },
