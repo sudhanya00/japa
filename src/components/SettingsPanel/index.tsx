@@ -22,7 +22,12 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }
     <Modal transparent visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={[styles.card, { backgroundColor: themeColors.surface }]}> 
-          <Text style={[styles.title, { color: themeColors.text }]}>Settings</Text>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: themeColors.text }]}>Settings</Text>
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={[styles.closeButtonText, { color: themeColors.textSecondary }]}>✕</Text>
+            </TouchableOpacity>
+          </View>
 
           {/* Theme */}
           <View style={styles.row}>
@@ -59,10 +64,6 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({ visible, onClose }
               ))}
             </View>
           </View>
-
-          <TouchableOpacity onPress={onClose} style={[styles.closeBtn, { backgroundColor: themeColors.primary }]}> 
-            <Text style={[styles.closeText]}>Close</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -74,16 +75,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
   },
   card: {
+    width: '100%',
+    maxWidth: 480,
     padding: 20,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    paddingBottom: 40,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    alignSelf: 'center',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '700',
-    marginBottom: 12,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    fontWeight: '300',
   },
   row: {
     marginBottom: 12,
@@ -112,16 +131,6 @@ const styles = StyleSheet.create({
   pillText: {
     fontSize: 14,
     textTransform: 'capitalize',
-  },
-  closeBtn: {
-    marginTop: 8,
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  closeText: {
-    color: '#fff',
-    fontWeight: '700',
   },
 });
 

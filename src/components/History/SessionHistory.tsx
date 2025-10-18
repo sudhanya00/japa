@@ -270,13 +270,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
   },
   container: {
+    width: '100%',
+    maxWidth: 480,
     maxHeight: '90%',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
     paddingBottom: 40,
+    alignSelf: 'center',
   },
   header: {
     flexDirection: 'row',
